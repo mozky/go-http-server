@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"os"
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +21,16 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Request for user %v\n", username)
 }
 
+func getEnv(key, fallback string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return fallback
+}
+
 func main() {
+	ENV := getEnv("GO_ENV", "development")
+
 	r := mux.NewRouter()
 
 	ipPtr := flag.String("ip", "127.0.0.1", "Ip that webserver binds to")
@@ -28,7 +38,7 @@ func main() {
 
 	flag.Parse()
 
-	log.Printf("Starting new server on %s:%d 😀", *ipPtr, *portPtr)
+	log.Printf("Starting new %s server on %s:%d 😀", ENV, *ipPtr, *portPtr)
 
 	r.HandleFunc("/", Handler)
 	r.HandleFunc("/user/{username}", UserHandler)
