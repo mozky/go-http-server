@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -20,10 +22,16 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := mux.NewRouter()
-	log.Print("Starting new server on :8000 😀")
+
+	ipPtr := flag.String("ip", "127.0.0.1", "Ip that webserver binds to")
+	portPtr := flag.Int("port", 8000, "Port that webserver listens to")
+
+	flag.Parse()
+
+	log.Printf("Starting new server on %s:%d 😀", *ipPtr, *portPtr)
 
 	r.HandleFunc("/", Handler)
 	r.HandleFunc("/user/{username}", UserHandler)
 
-	log.Fatal(http.ListenAndServe(":8000", r))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", *ipPtr, *portPtr), r))
 }
