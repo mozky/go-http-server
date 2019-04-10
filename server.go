@@ -28,10 +28,15 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.RequestURI)
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	ENV := getEnv("GO_ENV", "development")
-
-	r := mux.NewRouter()
 
 	ipPtr := flag.String("ip", "127.0.0.1", "Ip that webserver binds to")
 	portPtr := flag.Int("port", 8000, "Port that webserver listens to")
@@ -39,6 +44,9 @@ func main() {
 	flag.Parse()
 
 	log.Printf("Starting new %s server on %s:%d 😀", ENV, *ipPtr, *portPtr)
+	r := mux.NewRouter()
+
+	r.Use(loggingMiddleware)
 
 	r.HandleFunc("/", Handler)
 	r.HandleFunc("/user/{username}", UserHandler)
